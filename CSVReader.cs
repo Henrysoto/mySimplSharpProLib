@@ -4,7 +4,6 @@ using System.IO;
 using Crestron.SimplSharp;
 using CsvHelper;
 using CsvHelper.Configuration;
-using Microsoft.VisualBasic;
 
 namespace mySimplSharpProLib
 {
