@@ -1,4 +1,5 @@
 ﻿using Crestron.SimplSharp;
+using Crestron.SimplSharp.CrestronSockets;
 using Crestron.SimplSharpPro;
 
 namespace mySimplSharpProLib
@@ -29,6 +30,28 @@ namespace mySimplSharpProLib
                         CrestronConsole.PrintLine("Appui digital 3");
                         break;
                     }
+                }
+            }
+        }
+
+        private void TcpServerStatusChangeEvent(TCPServer server, uint clientId, SocketStatus serverSocketStatus)
+        {
+            switch (serverSocketStatus)
+            {
+                case SocketStatus.SOCKET_STATUS_CONNECTED:
+                {
+                    CrestronConsole.PrintLine("DEBUG TCP Server: Socket status connected, clientId {0}", clientId);
+                    break;
+                }
+                case SocketStatus.SOCKET_STATUS_WAITING:
+                {
+                    CrestronConsole.PrintLine("DEBUG TCP Server: Socket status waiting, clientId {0}", clientId);
+                    break;
+                }
+                case SocketStatus.SOCKET_STATUS_CONNECT_FAILED:
+                {
+                    CrestronConsole.PrintLine("DEBUG TCP Server: Socket status connection failed, clientId {0}", clientId);
+                    break;
                 }
             }
         }

@@ -1,5 +1,7 @@
 using System;
-using Crestron.SimplSharp;                          	// For Basic SIMPL# Classes
+using System.Text;
+using Crestron.SimplSharp;
+using Crestron.SimplSharp.CrestronSockets; // For Basic SIMPL# Classes
 using Crestron.SimplSharpPro;                       	// For Basic SIMPL#Pro classes
 using Crestron.SimplSharpPro.CrestronThread;        	// For Threading
 using Crestron.SimplSharpPro.Diagnostics;		    	// For System Monitor Access
@@ -12,6 +14,8 @@ namespace mySimplSharpProLib
     {
         private EthernetIntersystemCommunications _programTen;
         private ProgramTen _tcpClient;
+
+        private TCPServer _tcpServer;
         
         private const uint ProgramTenIpId = 0x03;
         /// <summary>
@@ -111,14 +115,33 @@ namespace mySimplSharpProLib
         {
             try
             {
-                CrestronConsole.PrintLine("DEBUG: START ----------------");
-                var csv = new CSVReader();
-                csv.ReadCSV(@"\html\test\MOCK_DATA.csv");
+                // CrestronConsole.PrintLine("DEBUG: START ----------------");
+                // var csv = new CSVReader();
+                // csv.ReadCSV(@"\html\test\MOCK_DATA.csv");
+                
+                // Écoute d'un socket tcp
+                _tcpServer = new TCPServer("0.0.0.0", 25000, 2048, EthernetAdapterType.EthernetCSAdapter);
+                _tcpServer.WaitForConnectionAsync(OnConnect);
+                _tcpServer.SocketStatusChange += TcpServerStatusChangeEvent;
+                CrestronConsole.PrintLine("DEBUG TCP Server: {0} {1} {2} {3}", _tcpServer.State, _tcpServer.PortNumber, 
+                    _tcpServer.ServerSocketStatus, _tcpServer.NumberOfClientsConnected);
             }
             catch (Exception e)
             {
                 ErrorLog.Error("Error in InitializeSystem: {0}", e.Message);
             }
+        }
+        
+        private void OnConnect(TCPServer server, uint clientId)
+        {
+            CrestronConsole.PrintLine("DEBUG TCP Server: ClientID {0} connected !", clientId);
+            byte[] testmsg = Encoding.ASCII.GetBytes("proutpacket");
+            if (server.SendData(clientId, testmsg, testmsg.Length) != SocketErrorCodes.SOCKET_OK)
+            {
+                CrestronConsole.PrintLine("DEBUG TCP Server: ClientID {0} erreur !", clientId);    
+            }
+            // server.Disconnect(clientId);
+            // CrestronConsole.PrintLine("DEBUG TCP Server: ClientID {0} disconnected !", clientId);
         }
 
         /// <summary>
